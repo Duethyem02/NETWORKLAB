@@ -36,3 +36,9 @@ int main()
 	close(sockfd);
 	return 0;
 }
+/*
+Socket successfully created
+Connected to the server
+
+Enter data to be send:welcome
+*/
