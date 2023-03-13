@@ -53,3 +53,10 @@ int main()
 	close(sockfd);
 	return 0;
 }
+/*
+Socket successfully created
+Socket binding done successfully
+server listening
+server accept client
+Message from client:welcome
+*/
