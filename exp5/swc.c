@@ -18,11 +18,11 @@ typedef struct frame
 	Packet packet;
 }Frame;
 
-int main()
+int main(int argc,char*argv[])
 {
 	if(argc!=2)
 	{
-		printf("Usage:%s<podt>",argv[0]);
+		printf("Usage:%s<port>",argv[0]);
 		exit(0);
 	}
 	int port=atoi(argv[1]);
@@ -34,7 +34,7 @@ int main()
 	Frame frame_send,frame_recv;
 	int ack_recv=1;
 	sockfd=socket(AF_INET,SOCK_DGRAM,0);
-	memset(&serverAddr,'\0',sizeof(serverAddr);
+	memset(&serverAddr,'\0',sizeof(serverAddr));
 	serverAddr.sin_family=AF_INET;
 	serverAddr.sin_port=htons(port);
 	serverAddr.sin_addr.s_addr=inet_addr("127.0.0.1");
@@ -42,13 +42,13 @@ int main()
 	{
 		if(ack_recv==1)
 		{
-			frame_send.sq_n0=frame_id;
+			frame_send.sq_no=frame_id;
 			frame_send.frame_kind=1;
 			frame_send.ack=0;
 			printf("Enter Data:");
 			scanf("%s",buffer);
 			strcpy(frame_send.packet.data,buffer);
-			sendto(sockfd,&frame_send,sizeof(Frame),0,?(struct sockaddr*)&serverAddr,sizeof(serverAddr));
+			sendto(sockfd,&frame_send,sizeof(Frame),0,(struct sockaddr*)&serverAddr,sizeof(serverAddr));
 			printf("[+] FrameSend\n");
 		}
 		int addr_size=sizeof(serverAddr);
@@ -60,7 +60,7 @@ int main()
 		}
 		else
 		{
-			printf("[-] Ack not Received\n");
+			printf("[-] Ack Not Received\n");
 			ack_recv =0;
 		}
 		frame_id++;
