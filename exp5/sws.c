@@ -21,7 +21,7 @@ typedef struct frame
 	Packet packet;
 }Frame;
 
-int main( int argc,char**argv)
+int main( int argc,char* argv[])
 {
 	if(argc!=2)
 	{
@@ -34,7 +34,8 @@ int main( int argc,char**argv)
 	char buffer[1024];
 	socklen_t addr_size;
 	int frame_id =0;
-	Frame frame_send,frame_recv;
+	Frame frame_send;
+	Frame frame_recv;
 	sockfd=socket(AF_INET,SOCK_DGRAM,0);
 	memset(&serverAddr,'\0',sizeof(serverAddr));
 	serverAddr.sin_family=AF_INET;
@@ -44,7 +45,7 @@ int main( int argc,char**argv)
 	addr_size=sizeof(newAddr);
 	while(1)
 	{
-		int f_recv_size=recvfrom(sockfd,&frame_recv,sizeof(Frame),0,(struct sockaddr*)&serverAddr,&addr_size);
+		int f_recv_size=recvfrom(sockfd,&frame_recv,sizeof(Frame),0,(struct sockaddr*)&newAddr,&addr_size);
 		if(f_recv_size>0 && frame_recv.frame_kind==1 && frame_recv.sq_no==frame_id)
 		{
 			printf("[+] Frame Received:%s\n",frame_recv.packet.data);
@@ -63,3 +64,4 @@ int main( int argc,char**argv)
 	close(sockfd);
 	return 0;
 }
+
