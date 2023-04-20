@@ -1,55 +1,68 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<netdb.h>
+#include<sys/types.h>
 #include<netinet/in.h>
 #include<sys/socket.h>
-#include<unistd.h>
+#include<fcntl.h>
 #include<string.h>
+#include<unistd.h>
+
+void itoa(int number,char numberString[])
+{
+	numberString[0]=(char)(number+48);
+	numberString[1]='\0';
+}
 
 int main()
 {
-	int sockfd,nsf,size,ft=1,cp,wait=3;
-	char data[100],digit[2];
-	struct sockaddr_in client;
+	int sockfd,nsf,size,ws=1,wc=1,we=4,ows,flag;
+	char buffer[100];
+	socklen_t len;
+	struct sockaddr_in server,client;
+	server.sin_family=AF_INET;
+	server.sin_port=3033;
+	server.sin_addr.s_addr=INADDR_ANY;
 	sockfd=socket(AF_INET,SOCK_STREAM,0);
-	client.sin_family=AF_INET;
-	client.sin_port=3033;
-	client.sin_addr.s_addr=INADDR_ANY;
 	printf("\nStarting up...");
-	size=sizeof(client);
-	printf("\nEstablishing connection to server..");
-	connect(sockfd,(struct sockaddr*)&client,size);
-	sprintf(data,"REQUEST");
-	send(sockfd,data,strlen(data),0);
+	int k;
+	k=bind(sockfd,(struct sockaddr*)&server,sizeof(server));
+	if(k==-1)
+		printf("Error in binding");
+	len=sizeof(client);
+	listen(sockfd,1);
+	nsf=accept(sockfd,(struct sockaddr*)&client,&len);
+	recv(nsf,buffer,100,0);
+	fcntl(nsf,F_SETFL,O_NONBLOCK);
+	printf("\nReceived a request from clinet.Sending packets one by one..");
 	do
 	{
-		recv(sockfd,data,100,0);
-		cp=atoi(data);
-		printf("\nGot Packet:%d",cp);
-		if(cp==3 && ft)
+		if(wc!=we)
 		{
-			printf("\n***Simulation =:Packet data corrupted or incomplete");
-			printf("\n***sending RETRANSMIT for packet 1");
-			memset(&data,0,sizeof(data));
-			sprintf(data,"R1");
-			send(sockfd,data,strlen(data),0);
-			ft=0;
+			itoa(wc,buffer);
+			send(nsf,buffer,100,0);
+			printf("\n Packet sent :%d\n",wc);
+			wc++;
 		}
-		else 
+		recv(nsf,buffer,100,0);
+		if(buffer[0]=='R')
 		{
-			wait--;
-			if(!wait)
-			{
-				printf("\n***Packet accepted->sending ACK");
-				wait=3;
-				sprintf(data,"A");
-				digit[0]=(char)(cp+48);
-				digit[1]='\0';
-				strcat(data,digit);
-				send(sockfd,data,strlen(data),0);
-			}
+			printf("\n**Received a RETRANSMIT packet.\nResending packet no:%c",buffer[1]);
+			itoa((atoi(&buffer[1])),buffer);
+			send(nsf,buffer,100,0);
+			wc=atoi(&buffer[0]);
+			wc++;
 		}
-	}while(cp!=9);
-	printf("\n All packets received.Exiting...\n");
+		else if(buffer[0]=='A')
+		{
+			ows=ws;
+			ws=atoi(&buffer[1])+1;
+			we+=(ws-ows);
+			printf("\n**Received ACK %c.Moving window boundary",buffer[1]);
+		}
+	}while(wc!=10);
 	close(sockfd);
+	close(nsf);
+	printf("\n Sending Complete.Sockets closed.Exiting...\n");
 	return(0);
 }
