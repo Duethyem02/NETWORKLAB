@@ -39,7 +39,7 @@ int main(int argc,char* argv[])
 	}
 	mesg[n]='\0';
 	printf("mesg:%s\n",mesg);
-	sprintf(mesg,"220 name_of_server_mail_server \n");
+	sprintf(mesg,"220 name_of_sender_mail_server \n");
 	sendto(sock_fd,mesg,MAXLINE,0,(struct sockaddr*)&cliaddr,sizeof(cliaddr));
 	n=recvfrom(sock_fd,mesg,MAXLINE,0,(struct sockaddr*)&cliaddr,&len);
 	mesg[n]='\0';
